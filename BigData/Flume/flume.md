@@ -39,3 +39,72 @@ Source ----push event----->  Channel -----poll event---->  Sink
 
 Flume支持一个Event到多个目的端：
 ![multiChannel](pictures/multichannel.png)
+
+---
+## 2、配置
+共分为四个步骤：
+
+1.定义flume agent、source、sink、channel
+```
+<Agent>.sources = <Source>
+<Agent>.sinks = <Sink>
+<Agent>.channels = <channels> <Channel2>
+```
+2.定义source的必填属性（以netcat为例）
+```
+<Agent>.sources.<Source>.type = netcat
+<Agent>.sources.<Source>.bind = 10.0.0.1
+<Agent>.sources.<Source>.port = 3344
+```
+
+3.定义channel
+```
+<Agent>.channels.<channels>.type = memory
+<Agent>.channels.<channels>.capacity = 1000
+<Agent>.channels.<channels>.transactionCapacity = 100
+```
+
+4.定义sink
+```
+<Agent>.sinks.<Sink>.type = logger
+<Agent>.sinks.<Sink>.maxBytesToLog = 2014
+```
+
+5.绑定source、sink对接的channel
+```
+<Agent>.sources.<Source>.channels = <Channel1> <Channel2> ...
+<Agent>.sinks.<Sink>.channel = <Channel1>
+```
+
+
+**备注**：支持定义各组件的自定义参数
+```
+# properties for sources
+<Agent>.sources.<Source>.<someProperty> = <someValue>
+# properties for channels
+<Agent>.channel.<Channel>.<someProperty> = <someValue>
+# properties for sinks
+<Agent>.sources.<Sink>.<someProperty> = <someValue>
+```
+---
+## 3、常用Source/Channel/Sink类型
+### Source
+- Exec Source: 执行命令
+- Spooling Directory Source: 监控目录文件
+- Kafka source
+- Syslogs Sources: 系统日志分析
+- HTTP Source
+
+### Channel
+- Memory Channel
+- JDBC Channel
+- Kafka Channel
+- File Channel
+
+### Sink
+- HDFS Sink
+- Hive Sink
+- Hbase Sink
+- ES Sink
+
+应用：将不同的数据通过各个agent收集日志到不同的HDFS目录，然后进行数据分析；对分析后的结果数据存储在HDFS、Hive或DB。
